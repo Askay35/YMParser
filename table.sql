@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS `parser_data` (`id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, `model_id` int(11) NOT NULL, `review_id` int(11) NOT NULL UNIQUE, `review_good` text, `review_bad` text, `review_comment` text, `review_grade` int(11), `review_author` varchar(255), `review_date` date) ENGINE=InnoDB DEFAULT CHARSET=utf8;
