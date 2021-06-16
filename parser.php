@@ -14,10 +14,12 @@ class Parser{
   public function __construct(){
     $this->cookiesfp = 'cookies.txt';
     $this->headers = [
-      "Cache-Control: max-age=0",
-      'Accept: */*',
+      "Cache-Control: no-cache",
+      'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
       'Accept-Encoding: gzip, deflate',
       'Connection: keep-alive',
+      'Pragma: no-cache',
+      'Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
       'sec-ch-ua: " Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
       'sec-ch-ua-mobile: ?0',
       'Sec-Fetch-Dest: document',
@@ -45,7 +47,7 @@ class Parser{
       CURLOPT_HTTPHEADER => $this->headers,
       CURLOPT_ENCODING => "",
       CURLOPT_HEADER => 1,
-      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_MAXREDIRS => 30,
     );
 
 
@@ -147,7 +149,6 @@ class PJsonParser{
       for ($i=0; $i < sizeof($reviews); $i++)
       {
         if($reviews[$i]['uid']!=0){
-          file_put_contents('2.json',json_encode($json));
           if(isset($json['user'])){
             $reviews[$i]['review_author'] = $json['user'][$reviews[$i]['uid']]['displayName'];
           }

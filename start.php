@@ -27,11 +27,11 @@ function getAllReviews(){
     echo "no pages count for id {$id}\n";
     //continue;
   }
-  $page = 2;
+  $page = ;
   while($page < $pagecount){
     if(!$json){
       echo "Parse {$id} error on page {$page}\n";
-      sleep(10);
+      sleep(60);
       break;
     }
     $json = $parser->getReviewsJson($id, $page);
@@ -39,7 +39,7 @@ function getAllReviews(){
     $db->addReviews($reviews);
     echo "page {$page} for id {$id} parsed\n";
     $page++;
-    sleep(10);
+    sleep(60);
     //}
     //echo "id {$id} parsed\n";
   }
