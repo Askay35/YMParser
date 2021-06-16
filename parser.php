@@ -80,16 +80,14 @@ class Parser{
     return $url;
   }
 
-  public function getReviewsJson($id, $pagenum){
-    $pokupki = strlen($id)>11;
+  public function getReviewsJson($id, $pagenum, $pokupki){
     $url = $this->getUrl($id, $pagenum,$pokupki);
     $html = $this->getHtml($url);
     if(!$html){
       return false;
     }
-    $json = $this->getJson($html, $pokupki);
+    $json = $this->getJson($html);
     if(!$json){
-      echo $html, "\n", file_get_contents($this->cookiesfp), "\n";
       echo "get captcha \n";
       exit();
       return false;
@@ -112,36 +110,24 @@ class Parser{
   }
 
 
-  private function getJson($html, $pokupki){
-    if($pokupki){
-      $matches = array_values(array_filter(preg_split('/(?<=(apiary-patch">))|(?=<\/noframes)/m', $html), function($k){
-        return $k%2!=0;
-      }, ARRAY_FILTER_USE_KEY));
-      if(sizeof($matches)==0){
-        return false;
-      }
-      $search = '{"widgets":{"@marketplace/ProductReviews"';
-      $json = $this->searchPokupkiJson($search,$matches);
-      if(!$json){
-        $search = '{"widgets":{"@MarketNode/ProductReviewsList"';
-        $json = $this->searchPokupkiJson($search, $matches);
-      }
-      return $json;
+  private function getJson($html){
+    $matches = array_values(array_filter(preg_split('/(?<=(apiary-patch">))|(?=<\/noframes)/m', $html), function($k){
+      return $k%2!=0;
+    }, ARRAY_FILTER_USE_KEY));
+    if(sizeof($matches)==0){
+      return false;
     }
-    else{
-
+    $search = '{"widgets":{"@marketplace/ProductReviews"';
+    $json = $this->searchPokupkiJson($search,$matches);
+    if(!$json){
+      $search = '{"widgets":{"@MarketNode/ProductReviewsList"';
+      $json = $this->searchPokupkiJson($search, $matches);
     }
+    return $json;
   }
 }
-//publicUser
-class MJsonParser{
 
-  static public function getPagesCount(&$json){
-    if(isset($json['reviewsResult'])){
-      return $json['reviewsResult'][array_key_first($json['reviewsResult'])]['pager']['totalPageCount'];
-    }
-    return false;
-  }
+class MJsonParser{
 
   static public function getReviews($json){
       $reviews = self::parseReviews($json);
@@ -151,12 +137,13 @@ class MJsonParser{
       }
       for ($i=0; $i < sizeof($reviews); $i++)
       {
-        if($reviews[$i]['uid']!=0){
+        if($reviews[$i]['uid']!=""){
           if(isset($json['publicUser'])){
             $reviews[$i]['review_author'] = $json['publicUser'][$reviews[$i]['uid']]['publicDisplayName'];
           }
           else{
             echo "no user array\n";
+            $reviews[$i]['review_author'] = "";
           }
         }
         else{
