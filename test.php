@@ -4,10 +4,7 @@ require_once 'parser.php';
 
 $parser = new Parser();
 
-
 function getHtml($url){
-  $ch = curl_init();
-
 
   $headers = [
     "Cache-Control: no-cache",
@@ -25,6 +22,8 @@ function getHtml($url){
     'Upgrade-Insecure-Requests: 1'
   ];
 
+  $ch = curl_init();
+
   $opts = array(
     CURLOPT_URL => $url,
     CURLOPT_RETURNTRANSFER => true,
@@ -34,6 +33,10 @@ function getHtml($url){
     CURLOPT_ENCODING => "",
     CURLOPT_HEADER => 1,
     CURLOPT_MAXREDIRS => 30,
+    CURLOPT_AUTOREFERER => true,
+    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    CURLOPT_COOKIEJAR => 'cookies.txt',
+    CURLOPT_COOKIEFILE => 'cookies.txt',
   );
 
 
@@ -41,18 +44,13 @@ function getHtml($url){
 
   $res = curl_exec($ch);
   if(!$res){
-    echo $url, "\n";
     echo curl_error($ch), "\n";
   }
-  preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $res, $matches);
-  $cookies = "Cookie: ";
-  foreach($matches[1] as $item) {
-      $cookies .= $item . "; ";
-  }
-  echo $res, "\n\n";
-  echo $cookies;
-  curl_close($ch);
-}
 
-$url = $parser->getUrl(530375023,1,0);
-getHtml($url);
+  curl_close($ch);
+  return $res;
+}
+//100956434277
+//673263882
+$url = $parser->getUrl(673263882,1,0);
+file_put_contents('1.html',getHtml($url));

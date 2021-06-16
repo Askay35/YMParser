@@ -31,14 +31,7 @@ class Parser{
   }
 
   public function getHtml($url){
-    $file = fopen($this->cookiesfp, 'w+');
-    if(filesize($this->cookiesfp)>0){
-      $cookies = fread($file, filesize($this->cookiesfp));
-      array_push($this->headers, $cookies);
-    }
-
     $ch = curl_init();
-
     $opts = array(
       CURLOPT_URL => $url,
       CURLOPT_RETURNTRANSFER => true,
@@ -48,23 +41,16 @@ class Parser{
       CURLOPT_ENCODING => "",
       CURLOPT_HEADER => 1,
       CURLOPT_MAXREDIRS => 30,
+      CURLOPT_AUTOREFERER => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_COOKIEJAR => 'cookies.txt',
+      CURLOPT_COOKIEFILE => 'cookies.txt',
     );
-
-
     curl_setopt_array($ch,$opts);
-
     $res = curl_exec($ch);
     if(!$res){
-      echo $url, "  ";
       echo curl_error($ch), "\n";
     }
-    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $res, $matches);
-    $cookies = "Cookie: ";
-    foreach($matches[1] as $item) {
-        $cookies .= $item . "; ";
-    }
-    fwrite($file, $cookies);
-    fclose($file);
     curl_close($ch);
     return $res;
   }
@@ -137,9 +123,10 @@ class MJsonParser{
       }
       for ($i=0; $i < sizeof($reviews); $i++)
       {
-        if($reviews[$i]['uid']!=""){
+        $uid = $reviews[$i]['uid'];
+        if($uid!=""){
           if(isset($json['publicUser'])){
-            $reviews[$i]['review_author'] = $json['publicUser'][$reviews[$i]['uid']]['publicDisplayName'];
+            $reviews[$i]['review_author'] = $json['publicUser'][$uid]['publicDisplayName'];
           }
           else{
             echo "no user array\n";
