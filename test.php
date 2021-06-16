@@ -54,5 +54,5 @@ function getHtml($url){
   curl_close($ch);
 }
 
-$url = $parser->getUrl(100956434277,2,1);
+$url = $parser->getUrl(530375023,1,0);
 getHtml($url);

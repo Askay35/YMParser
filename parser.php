@@ -55,7 +55,7 @@ class Parser{
 
     $res = curl_exec($ch);
     if(!$res){
-      echo $url, "\n";
+      echo $url, "  ";
       echo curl_error($ch), "\n";
     }
     preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $res, $matches);
@@ -97,7 +97,7 @@ class Parser{
     return $json;
   }
 
-  private function searchReviewsJson($search, $matches)
+  private function searchPokupkiJson($search, $matches)
   {
     $json = false;
     $searchlen = strlen($search);
@@ -121,12 +121,15 @@ class Parser{
         return false;
       }
       $search = '{"widgets":{"@marketplace/ProductReviews"';
-      $json = $this->searchReviewsJson($search,$matches);
+      $json = $this->searchPokupkiJson($search,$matches);
       if(!$json){
         $search = '{"widgets":{"@MarketNode/ProductReviewsList"';
-        $json = $this->searchReviewsJson($search, $matches);
+        $json = $this->searchPokupkiJson($search, $matches);
       }
       return $json;
+    }
+    else{
+
     }
   }
 }
