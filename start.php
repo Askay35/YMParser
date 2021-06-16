@@ -14,13 +14,13 @@ function start(){
   foreach ($ids as $id) {
     echo "parsing id $id \n";
     $pokupki = strlen($id)>11;
-    $json = $parser->getReviewsJson($id, 1, $pokupki);
-    if(!$json){
-      echo "no response for id {$id}\n";
-      continue;
-    }
     if($pokupki){
-      $reviews = PJsonParser::getReviews($json);
+      $json = $parser->getReviewsJson($id, 1, $pokupki);
+      if(!$json){
+        echo "no response for id {$id}\n";
+        continue;
+      }
+        $reviews = PJsonParser::getReviews($json);
       $db->addReviews($reviews);
       echo "page 1 for id {$id} parsed\n";
       $pagecount = PJsonParser::getPagesCount($json);
@@ -44,8 +44,9 @@ function start(){
       }
     }
     else{
+      $page = 1;
       while(true){
-        $json = $parser->getReviewsJson($id, $page);
+        $json = $parser->getReviewsJson($id, $page,$pokupki);
         $reviews = MJsonParser::getReviews($json);
         if(!$json){
           echo "Parse {$id} error on page {$page}\n";
@@ -65,4 +66,4 @@ function start(){
   }
 }
 
-getAllReviews();
+start();

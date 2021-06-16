@@ -174,9 +174,6 @@ class MJsonParser{
         $userId = strval($reviewObj['userId']);
       }
     }
-    else{
-      return false;
-    }
     $review_date = Formater::getDateFromTs($reviewObj['created']);
     $productId = $reviewObj['productId'];
     $review_id = intval($reviewObj['id']);
