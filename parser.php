@@ -133,6 +133,74 @@ class Parser{
     }
   }
 }
+//publicUser
+class MJsonParser{
+
+  static public function getPagesCount(&$json){
+    if(isset($json['reviewsResult'])){
+      return $json['reviewsResult'][array_key_first($json['reviewsResult'])]['pager']['totalPageCount'];
+    }
+    return false;
+  }
+
+  static public function getReviews($json){
+      $reviews = self::parseReviews($json);
+      if(!$reviews){
+        echo "no reviews\n";
+        return false;
+      }
+      for ($i=0; $i < sizeof($reviews); $i++)
+      {
+        if($reviews[$i]['uid']!=0){
+          if(isset($json['publicUser'])){
+            $reviews[$i]['review_author'] = $json['publicUser'][$reviews[$i]['uid']]['publicDisplayName'];
+          }
+          else{
+            echo "no user array\n";
+          }
+        }
+        else{
+          $reviews[$i]['review_author'] = "";
+        }
+      }
+      return $reviews;
+  }
+
+  static private function parseReviews(&$json)
+  {
+    $reviews = [];
+    if(!isset($json['review'])){
+      return false;
+    }
+    $reviewsSrc = $json['review'];
+    $reviewsIds = array_keys($reviewsSrc);
+    for ($i=0; $i < sizeof($reviewsSrc); $i++) {
+        array_push($reviews, self::formatReview($reviewsSrc[$reviewsIds[$i]]));
+    }
+    return $reviews;
+  }
+
+  static private function formatReview($reviewObj){
+    $userId = "";
+    if(isset($reviewObj['anonymous'])){
+      if($reviewObj['anonymous'] == 0){
+        $userId = strval($reviewObj['userId']);
+      }
+    }
+    else{
+      return false;
+    }
+    $review_date = Formater::getDateFromTs($reviewObj['created']);
+    $productId = $reviewObj['productId'];
+    $review_id = intval($reviewObj['id']);
+    $review_grade = $reviewObj['averageGrade'];
+    $review_good = $reviewObj['pro'];
+    $review_bad = $reviewObj['contra'];
+    $review_comment = $reviewObj['comment'];
+    $review = ["review_id"=>$review_id, "review_comment"=>$review_comment,"review_good"=>$review_good,"review_bad"=>$review_bad, "review_grade"=>$review_grade,"model_id"=>$productId, "review_date"=>$review_date, 'uid'=>$userId];
+    return $review;
+  }
+}
 
 class PJsonParser{
 

@@ -6,8 +6,7 @@ require_once 'input.php';
 
 
 
-
-function getAllReviews(){
+function start(){
   $parser = new Parser();
   $settings = json_decode(file_get_contents('settings.json'),true);
   $db = new DB($settings['host'], $settings['db'], $settings['user'], $settings['password']);
