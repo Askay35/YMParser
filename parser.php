@@ -1,7 +1,5 @@
 <?php
 
-//curl "https://pokupki.market.yandex.ru/product/100956434277/reviews?page=1" -H  -H  -H  -H  -H  -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9" -H "Sec-Fetch-Site: none" -H "Sec-Fetch-Mode: navigate" -H "Sec-Fetch-User: ?1" -H "Sec-Fetch-Dest: document" -H "Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7"
-
 class Formater{
   static public function getDateFromTs($ts)
   {
@@ -11,8 +9,8 @@ class Formater{
 
 class Parser{
 
-  public function __construct(){
-    $this->cookiesfp = 'cookies.txt';
+  public function __construct(){//$proxies){
+    //$this->proxies = $proxies;
     $this->headers = [
       "Cache-Control: no-cache",
       'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -20,18 +18,20 @@ class Parser{
       'Connection: keep-alive',
       'Pragma: no-cache',
       'Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-      'sec-ch-ua: " Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
-      'sec-ch-ua-mobile: ?0',
-      'Sec-Fetch-Dest: document',
-      'Sec-Fetch-Mode: navigate',
-      'Sec-Fetch-Site: none',
-      'Sec-Fetch-User: ?1',
-      'Upgrade-Insecure-Requests: 1'
+      //'sec-ch-ua: " Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
+      //'sec-ch-ua-mobile: ?0',
+      //'Sec-Fetch-Dest: document',
+      //'Sec-Fetch-Mode: navigate',
+      //'Sec-Fetch-Site: none',
+      //'Sec-Fetch-User: ?1',
+      //'Upgrade-Insecure-Requests: 1'
     ];
   }
 
   public function getHtml($url){
     $ch = curl_init();
+
+    //$proxy = $this->proxies[random_int(0, sizeof($this->proxies)-1)];
     $opts = array(
       CURLOPT_URL => $url,
       CURLOPT_RETURNTRANSFER => true,
@@ -39,18 +39,30 @@ class Parser{
       CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36",
       CURLOPT_HTTPHEADER => $this->headers,
       CURLOPT_ENCODING => "",
+      //CURLOPT_PROXY => $proxy,
       CURLOPT_HEADER => 1,
-      CURLOPT_MAXREDIRS => 30,
+      CURLOPT_MAXREDIRS => 10,
       CURLOPT_AUTOREFERER => true,
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
       CURLOPT_COOKIEJAR => 'cookies.txt',
       CURLOPT_COOKIEFILE => 'cookies.txt',
     );
+
+    //echo "using proxy $proxy \n";
+
     curl_setopt_array($ch,$opts);
     $res = curl_exec($ch);
     if(!$res){
+      //if(curl_errno($ch)==CURLE_COULDNT_CONNECT || curl_errno($ch)==CURLE_CO){
+      //  echo "timeout, switching proxy $proxy\n";
+      //  curl_close($ch);
+      //  return $this->getHtml($url);
+      //}
       echo curl_error($ch), "\n";
+      curl_close($ch);
+      return false;
     }
+
     curl_close($ch);
     return $res;
   }
@@ -123,18 +135,20 @@ class MJsonParser{
       }
       for ($i=0; $i < sizeof($reviews); $i++)
       {
+        $reviews[$i]['review_author'] = "";
         $uid = $reviews[$i]['uid'];
         if($uid!=""){
           if(isset($json['publicUser'])){
-            $reviews[$i]['review_author'] = $json['publicUser'][$uid]['publicDisplayName'];
+            if(isset($json['publicUser'][$uid])){
+              $reviews[$i]['review_author'] = $json['publicUser'][$uid]['publicDisplayName'];
+            }
+            else{
+              echo "anon user\n";
+            }
           }
           else{
             echo "no user array\n";
-            $reviews[$i]['review_author'] = "";
           }
-        }
-        else{
-          $reviews[$i]['review_author'] = "";
         }
       }
       return $reviews;

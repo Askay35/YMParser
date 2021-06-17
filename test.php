@@ -1,9 +1,5 @@
 <?php
 
-require_once 'parser.php';
-
-$parser = new Parser();
-
 function getHtml($url){
 
   $headers = [
@@ -29,16 +25,15 @@ function getHtml($url){
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36",
-    CURLOPT_HTTPHEADER => $headers,
     CURLOPT_ENCODING => "",
+    CURLOPT_HTTPHEADER => $headers,
     CURLOPT_HEADER => 1,
-    CURLOPT_MAXREDIRS => 30,
+    CURLOPT_MAXREDIRS => 10,
     CURLOPT_AUTOREFERER => true,
     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
     CURLOPT_COOKIEJAR => 'cookies.txt',
     CURLOPT_COOKIEFILE => 'cookies.txt',
   );
-
 
   curl_setopt_array($ch,$opts);
 
@@ -47,10 +42,12 @@ function getHtml($url){
     echo curl_error($ch), "\n";
   }
 
+  $matches = preg_match('/^Set-Cookie:\s*([^;]*)/mi', $res);
+  var_dump($matches);
+
   curl_close($ch);
   return $res;
 }
 //100956434277
 //673263882
-$url = $parser->getUrl(673263882,1,0);
-file_put_contents('1.html',getHtml($url));
+getHtml("http://localhost:8080/server.php");

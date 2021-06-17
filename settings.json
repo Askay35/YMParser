@@ -3,5 +3,6 @@
   "db":"market",
   "user":"root",
   "password":"",
-  "ids_file":"test.csv"
+  "ids_file":"test.csv",
+  "proxies_file":"proxy.txt"
 }
