@@ -1,7 +1,6 @@
 <?php
 
 function getHtml($url){
-
   $headers = [
     "Cache-Control: no-cache",
     'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -17,13 +16,11 @@ function getHtml($url){
     'Sec-Fetch-User: ?1',
     'Upgrade-Insecure-Requests: 1'
   ];
-
   $ch = curl_init();
-
   $opts = array(
     CURLOPT_URL => $url,
     CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_FOLLOWLOCATION => true,
+    //CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36",
     CURLOPT_ENCODING => "",
     CURLOPT_HTTPHEADER => $headers,
@@ -31,8 +28,8 @@ function getHtml($url){
     CURLOPT_MAXREDIRS => 10,
     CURLOPT_AUTOREFERER => true,
     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    CURLOPT_COOKIEJAR => 'cookies.txt',
-    CURLOPT_COOKIEFILE => 'cookies.txt',
+    //CURLOPT_COOKIEJAR => 'cookies.txt',
+    //CURLOPT_COOKIEFILE => 'cookies.txt',
   );
 
   curl_setopt_array($ch,$opts);
@@ -42,8 +39,9 @@ function getHtml($url){
     echo curl_error($ch), "\n";
   }
 
-  $matches = preg_match('/^Set-Cookie:\s*([^;]*)/mi', $res);
-  var_dump($matches);
+  preg_match_all('/^Set-Cookie:\s(.*)/mi', $res, $results);
+  $cookies = "Cookie: " . implode('; ', $results[1]);
+  file_put_contents('1.txt',$cookies);
 
   curl_close($ch);
   return $res;

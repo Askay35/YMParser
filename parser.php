@@ -18,13 +18,13 @@ class Parser{
       'Connection: keep-alive',
       'Pragma: no-cache',
       'Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-      //'sec-ch-ua: " Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
-      //'sec-ch-ua-mobile: ?0',
-      //'Sec-Fetch-Dest: document',
-      //'Sec-Fetch-Mode: navigate',
-      //'Sec-Fetch-Site: none',
-      //'Sec-Fetch-User: ?1',
-      //'Upgrade-Insecure-Requests: 1'
+      'sec-ch-ua: " Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
+      'sec-ch-ua-mobile: ?0',
+      'Sec-Fetch-Dest: document',
+      'Sec-Fetch-Mode: navigate',
+      'Sec-Fetch-Site: none',
+      'Sec-Fetch-User: ?1',
+      'Upgrade-Insecure-Requests: 1'
     ];
   }
 
@@ -39,7 +39,7 @@ class Parser{
       CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36",
       CURLOPT_HTTPHEADER => $this->headers,
       CURLOPT_ENCODING => "",
-      //CURLOPT_PROXY => $proxy,
+      CURLOPT_PROXY => "95.188.145.182:8080",
       CURLOPT_HEADER => 1,
       CURLOPT_MAXREDIRS => 10,
       CURLOPT_AUTOREFERER => true,
