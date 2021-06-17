@@ -20,7 +20,6 @@ function getHtml($url){
   $opts = array(
     CURLOPT_URL => $url,
     CURLOPT_RETURNTRANSFER => true,
-    //CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36",
     CURLOPT_ENCODING => "",
     CURLOPT_HTTPHEADER => $headers,
@@ -28,8 +27,6 @@ function getHtml($url){
     CURLOPT_MAXREDIRS => 10,
     CURLOPT_AUTOREFERER => true,
     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    //CURLOPT_COOKIEJAR => 'cookies.txt',
-    //CURLOPT_COOKIEFILE => 'cookies.txt',
   );
 
   curl_setopt_array($ch,$opts);
@@ -38,14 +35,11 @@ function getHtml($url){
   if(!$res){
     echo curl_error($ch), "\n";
   }
-
-  preg_match_all('/^Set-Cookie:\s(.*)/mi', $res, $results);
-  $cookies = "Cookie: " . implode('; ', $results[1]);
-  file_put_contents('1.txt',$cookies);
+  echo $res;
 
   curl_close($ch);
   return $res;
 }
 //100956434277
 //673263882
-getHtml("http://localhost:8080/server.php");
+echo "\n\n\n\n",strlen(getHtml("https://market.yandex.ru/product--videoregistrator-70mai-rearview-dash-cam-wide-midrive-d07-2-kamery/673263882/reviews?page=1"));

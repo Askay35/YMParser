@@ -9,29 +9,63 @@ class Formater{
 
 class Parser{
 
-  public function __construct(){//$proxies){
-    //$this->proxies = $proxies;
+  public function __construct($proxies=false){
+
+    if($proxies!=false){
+      $this->proxies = $proxies;
+      $this->proxyid = 0;
+      $this->proxy = $this->proxies[$this->proxyid];
+      $this->lastproxy = sizeof($proxies)-1;
+      $this->useproxylist = true;
+    }
+    else{
+      $this->proxy = "";
+      $this->useproxylist = false;
+      $this->switchProxy();
+    }
     $this->headers = [
-      "Cache-Control: no-cache",
-      'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+      'Accept: */*',
       'Accept-Encoding: gzip, deflate',
       'Connection: keep-alive',
-      'Pragma: no-cache',
-      'Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-      'sec-ch-ua: " Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
-      'sec-ch-ua-mobile: ?0',
-      'Sec-Fetch-Dest: document',
-      'Sec-Fetch-Mode: navigate',
-      'Sec-Fetch-Site: none',
-      'Sec-Fetch-User: ?1',
-      'Upgrade-Insecure-Requests: 1'
     ];
+  }
+
+  private function switchProxy()
+  {
+    if(is_file(realpath('cookies.txt'))){
+      unlink(realpath('cookies.txt'));
+    }
+    $apiurl = "https://api.getproxylist.com/proxy?allowsCustomHeaders=1&allowsUserAgentHeader=1&allowsCookies=1&allowsCustomHeaders=1";
+
+    if($this->useproxylist){
+      $this->proxyid++;
+      if($this->proxyid > $this->lastproxy){
+        $this->proxyid = 0;
+      }
+      $this->proxy = $this->proxies[$this->proxyid];
+    }
+    else{
+      $res = file_get_contents($apiurl);
+      if(!$res){
+        echo "proxy limit\n";
+        sleep(5);
+        exit();
+      }
+      $apidata = json_decode($res, true);
+      if(isset($apidata['ip'])){
+        $this->proxy = "{$apidata['ip']}:{$apidata['port']}";
+      }
+      else{
+        echo "proxy limit\n";
+        sleep(5);
+        exit();
+      }
+    }
   }
 
   public function getHtml($url){
     $ch = curl_init();
 
-    //$proxy = $this->proxies[random_int(0, sizeof($this->proxies)-1)];
     $opts = array(
       CURLOPT_URL => $url,
       CURLOPT_RETURNTRANSFER => true,
@@ -39,29 +73,32 @@ class Parser{
       CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36",
       CURLOPT_HTTPHEADER => $this->headers,
       CURLOPT_ENCODING => "",
-      CURLOPT_PROXY => "95.188.145.182:8080",
+      CURLOPT_PROXY => $this->proxy,
       CURLOPT_HEADER => 1,
       CURLOPT_MAXREDIRS => 10,
-      CURLOPT_AUTOREFERER => true,
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
       CURLOPT_COOKIEJAR => 'cookies.txt',
       CURLOPT_COOKIEFILE => 'cookies.txt',
+      CURLOPT_CONNECTTIMEOUT => 60
     );
 
-    //echo "using proxy $proxy \n";
+    echo "using proxy $this->proxy\n";
 
     curl_setopt_array($ch,$opts);
     $res = curl_exec($ch);
     if(!$res){
-      //if(curl_errno($ch)==CURLE_COULDNT_CONNECT || curl_errno($ch)==CURLE_CO){
-      //  echo "timeout, switching proxy $proxy\n";
-      //  curl_close($ch);
-      //  return $this->getHtml($url);
-      //}
-      echo curl_error($ch), "\n";
+      echo "timeout, switching proxy $this->proxy\n";
+      $this->switchProxy();
       curl_close($ch);
-      return false;
+      return $this->getHtml($url);
     }
+    if(strlen($res)<30000){
+      echo "get captcha\n";
+      $this->switchProxy();
+      curl_close($ch);
+      return $this->getHtml($url);
+    }
+
 
     curl_close($ch);
     return $res;
@@ -86,8 +123,7 @@ class Parser{
     }
     $json = $this->getJson($html);
     if(!$json){
-      echo "get captcha \n";
-      exit();
+      echo "no reviews\n";
       return false;
     }
     return $json;

@@ -10,8 +10,15 @@ function start(){
   $settings = json_decode(file_get_contents('settings.json'),true);
   $db = new DB($settings['host'], $settings['db'], $settings['user'], $settings['password']);
   $ids = getIds($settings['ids_file']);
-  //$proxies = getProxies($settings['proxies_file']);
-  $parser = new Parser();
+  $delay = 10;
+  $proxies = getProxies($settings['proxies_file']);
+  $parser;
+  if(sizeof($proxies)>0){
+    $parser = new Parser($proxies);
+  }
+  else{
+    $parser = new Parser();
+  }
   foreach ($ids as $id) {
     echo "parsing id $id \n";
     $pokupki = strlen($id)>11;
@@ -33,7 +40,7 @@ function start(){
       while($page < $pagecount){
         if(!$json){
           echo "Parse {$id} error on page {$page}\n";
-          sleep(20);
+          sleep($delay);
           break;
         }
         $json = $parser->getReviewsJson($id, $page);
@@ -41,7 +48,7 @@ function start(){
         $db->addReviews($reviews);
         echo "page {$page} for id {$id} parsed\n";
         $page++;
-        sleep(20);
+        sleep($delay);
       }
     }
     else{
@@ -60,12 +67,15 @@ function start(){
         $db->addReviews($reviews);
         echo "page {$page} for id {$id} parsed\n";
         $page++;
-        sleep(20);
+        sleep($delay);
       }
     }
     echo "id {$id} parsed\n";
   }
-  //unlink(__DIR__ . '/cookies.txt');
 }
 
 start();
+
+if(is_file(realpath('cookies.txt'))){
+  unlink(realpath('cookies.txt'));
+}
